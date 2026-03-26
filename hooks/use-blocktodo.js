@@ -1,0 +1,222 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import { useAccount, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
+import { readContract } from '@wagmi/core'
+import { Attribution } from 'ox/erc8021'
+import { hashTaskContent } from '@/lib/ox'
+import { blockTodoAbi, blockTodoAddress, blockTodoAppId, blockTodoAppName } from '@/lib/blocktodo'
+import { getLocalTasks, removeLocalTask, storeLocalTask } from '@/lib/local-tasks'
+import { wagmiConfig } from '@/lib/wagmi'
+import { trackTransaction } from '@/utils/track'
+
+function buildDataSuffix() {
+  const appCode = process.env.NEXT_PUBLIC_ERC8021_APP_CODE || 'blocktodo'
+  return Attribution.toDataSuffix({ codes: [appCode] })
+}
+
+async function fetchTasks(address, count) {
+  const local = getLocalTasks(address)
+  const ids = Array.from({ length: Number(count) }, (_, index) => index)
+  const entries = await Promise.all(
+    ids.map(async (id) => {
+      const result = await readContract(wagmiConfig, {
+        address: blockTodoAddress,
+        abi: blockTodoAbi,
+        functionName: 'getTask',
+        args: [address, id],
+      })
+
+      const saved = local[String(id)]
+      const content = saved?.content || ''
+      const contentHash = result[0]
+      const createdAt = Number(result[1])
+      const computedHash = content ? hashTaskContent(content) : null
+
+      return {
+        id,
+        content,
+        contentHash,
+        createdAt,
+        createdLabel: createdAt ? new Date(createdAt * 1000).toLocaleString() : 'Unknown',
+        completed: result[2],
+        deleted: result[3],
+        hashMatches: computedHash ? computedHash.toLowerCase() === contentHash.toLowerCase() : false,
+      }
+    }),
+  )
+
+  return entries.reverse()
+}
+
+export function useBlockTodo() {
+  const { address, isConnected } = useAccount()
+  const publicClient = usePublicClient()
+  const { writeContractAsync } = useWriteContract()
+  const [items, setItems] = useState([])
+  const [writeState, setWriteState] = useState({
+    pending: false,
+    statusMessage: 'Idle',
+  })
+
+  const { data: taskCountData, isLoading: taskCountLoading, refetch: refetchCount } = useReadContract({
+    address: blockTodoAddress,
+    abi: blockTodoAbi,
+    functionName: 'getTaskCount',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: Boolean(address),
+    },
+  })
+
+  const taskCount = useMemo(() => Number(taskCountData || 0), [taskCountData])
+
+  const refresh = async () => {
+    if (!address || !isConnected) {
+      setItems([])
+      return
+    }
+    const freshCount = await refetchCount()
+    const nextCount = Number(freshCount.data || 0)
+    const nextItems = await fetchTasks(address, nextCount)
+    setItems(nextItems)
+  }
+
+  useEffect(() => {
+    refresh()
+  }, [address, taskCountData])
+
+  const commitWrite = async (config, options = {}) => {
+    if (!address || !publicClient) return false
+
+    setWriteState({
+      pending: true,
+      statusMessage: 'Awaiting wallet confirmation',
+    })
+
+    try {
+      const hash = await writeContractAsync({
+        ...config,
+        dataSuffix: buildDataSuffix(),
+      })
+
+      setWriteState({
+        pending: true,
+        statusMessage: 'Transaction sent',
+      })
+
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+
+      if (options.persistTask) {
+        storeLocalTask(address, options.persistTask.id, options.persistTask.content)
+      }
+
+      if (options.removeTaskId !== undefined) {
+        removeLocalTask(address, options.removeTaskId)
+      }
+
+      trackTransaction(blockTodoAppId, blockTodoAppName, address, receipt.transactionHash)
+      await refresh()
+
+      setWriteState({
+        pending: false,
+        statusMessage: `Confirmed: ${receipt.transactionHash.slice(0, 10)}...`,
+      })
+
+      return true
+    } catch (error) {
+      setWriteState({
+        pending: false,
+        statusMessage: error?.shortMessage || error?.message || 'Transaction failed',
+      })
+      return false
+    }
+  }
+
+  const createTask = async (content) => {
+    const nextId = taskCount
+    return commitWrite(
+      {
+        address: blockTodoAddress,
+        abi: blockTodoAbi,
+        functionName: 'createTask',
+        args: [content],
+      },
+      {
+        persistTask: { id: nextId, content },
+      },
+    )
+  }
+
+  const batchCreate = async (contents) => {
+    const startingId = taskCount
+    const ok = await commitWrite({
+      address: blockTodoAddress,
+      abi: blockTodoAbi,
+      functionName: 'batchCreate',
+      args: [contents],
+    })
+
+    if (ok && address) {
+      contents.forEach((content, index) => {
+        storeLocalTask(address, startingId + index, content)
+      })
+      await refresh()
+    }
+
+    return ok
+  }
+
+  const updateTask = async (id, content) => {
+    if (!Number.isInteger(id) || id < 0 || !content.trim()) return false
+    return commitWrite(
+      {
+        address: blockTodoAddress,
+        abi: blockTodoAbi,
+        functionName: 'updateTask',
+        args: [id, content],
+      },
+      {
+        persistTask: { id, content },
+      },
+    )
+  }
+
+  const toggleTask = async (id) => {
+    if (!Number.isInteger(id) || id < 0) return false
+    return commitWrite({
+      address: blockTodoAddress,
+      abi: blockTodoAbi,
+      functionName: 'toggleTask',
+      args: [id],
+    })
+  }
+
+  const deleteTask = async (id) => {
+    if (!Number.isInteger(id) || id < 0) return false
+    return commitWrite(
+      {
+        address: blockTodoAddress,
+        abi: blockTodoAbi,
+        functionName: 'deleteTask',
+        args: [id],
+      },
+      {
+        removeTaskId: id,
+      },
+    )
+  }
+
+  return {
+    items,
+    taskCount,
+    isLoading: taskCountLoading || writeState.pending,
+    refresh,
+    createTask,
+    batchCreate,
+    updateTask,
+    toggleTask,
+    deleteTask,
+    writeState,
+  }
+}

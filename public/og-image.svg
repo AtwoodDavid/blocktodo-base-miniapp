@@ -1,0 +1,16 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#E8D1AA"/>
+  <rect x="34" y="34" width="1132" height="562" rx="36" fill="#F8F1E1" stroke="#6D3921" stroke-width="4"/>
+  <rect x="84" y="84" width="548" height="462" rx="26" fill="#6D3921"/>
+  <rect x="116" y="116" width="484" height="398" rx="18" fill="#F2E6CF"/>
+  <path d="M162 188H402" stroke="#6D3921" stroke-width="24" stroke-linecap="round"/>
+  <path d="M162 246H482" stroke="#A24A2A" stroke-width="24" stroke-linecap="round"/>
+  <path d="M162 304H510" stroke="#46563D" stroke-width="24" stroke-linecap="round"/>
+  <path d="M162 362H430" stroke="#B7893C" stroke-width="24" stroke-linecap="round"/>
+  <path d="M162 420H344" stroke="#6D3921" stroke-width="24" stroke-linecap="round"/>
+  <text x="674" y="210" fill="#2C241D" font-size="88" font-family="Trebuchet MS, Verdana, sans-serif" font-weight="700">BlockTodo</text>
+  <text x="674" y="290" fill="#5D5145" font-size="34" font-family="Georgia, serif">Chain-backed task keeping on Base</text>
+  <text x="674" y="364" fill="#A24A2A" font-size="28" font-family="Georgia, serif">Vintage utility. Multiple pages. Wallet-ready.</text>
+  <rect x="674" y="410" width="236" height="64" rx="32" fill="#2C241D"/>
+  <text x="722" y="452" fill="#F8F1E1" font-size="28" font-family="Trebuchet MS, Verdana, sans-serif">Open Mini App</text>
+</svg>
