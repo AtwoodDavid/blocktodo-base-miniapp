@@ -44,7 +44,7 @@ export function VerificationBoard() {
           </article>
           <article>
             <h3>8021 locked</h3>
-            <p>The app now uses your exact ERC-8021 encoded attribution string on transaction writes instead of a placeholder suffix.</p>
+            <p>The app now uses your exact ERC-8021 encoded attribution string and prefers the wallet_sendCalls path for Base-compatible smart wallet attribution.</p>
           </article>
         </div>
         <p className="footer-note">Current app tracking id in the dashboard call is <span className="mono">app-001</span>.</p>

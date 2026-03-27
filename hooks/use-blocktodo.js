@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useAccount, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
-import { readContract } from '@wagmi/core'
+import { useAccount, usePublicClient, useReadContract, useSendCalls, useWriteContract } from 'wagmi'
+import { readContract, waitForCallsStatus } from '@wagmi/core'
+import { base } from 'wagmi/chains'
+import { encodeFunctionData } from 'viem'
 import { hashTaskContent } from '@/lib/ox'
 import {
   blockTodoAbi,
@@ -52,6 +54,7 @@ async function fetchTasks(address, count) {
 export function useBlockTodo() {
   const { address, isConnected } = useAccount()
   const publicClient = usePublicClient()
+  const { sendCallsAsync } = useSendCalls()
   const { writeContractAsync } = useWriteContract()
   const [items, setItems] = useState([])
   const [writeState, setWriteState] = useState({
@@ -95,17 +98,66 @@ export function useBlockTodo() {
     })
 
     try {
-      const hash = await writeContractAsync({
-        ...config,
-        dataSuffix: blockTodoEncodedAttribution,
-      })
-
       setWriteState({
         pending: true,
-        statusMessage: 'Transaction sent',
+        statusMessage: 'Sending call bundle',
       })
 
-      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      let transactionHash
+      let usedFallback = false
+
+      try {
+        const result = await sendCallsAsync({
+          account: address,
+          chainId: base.id,
+          calls: [
+            {
+              to: blockTodoAddress,
+              data: encodeFunctionData({
+                abi: blockTodoAbi,
+                functionName: config.functionName,
+                args: config.args,
+              }),
+            },
+          ],
+          capabilities: {
+            dataSuffix: {
+              value: blockTodoEncodedAttribution,
+            },
+          },
+        })
+
+        setWriteState({
+          pending: true,
+          statusMessage: 'Waiting for wallet_sendCalls receipt',
+        })
+
+        const callsStatus = await waitForCallsStatus(wagmiConfig, {
+          id: result.id,
+          pollingInterval: 1_000,
+          timeout: 120_000,
+        })
+
+        transactionHash = callsStatus.receipts?.[0]?.transactionHash
+      } catch (sendCallsError) {
+        usedFallback = true
+
+        setWriteState({
+          pending: true,
+          statusMessage: 'sendCalls unavailable, using fallback write',
+        })
+
+        transactionHash = await writeContractAsync({
+          ...config,
+          dataSuffix: blockTodoEncodedAttribution,
+        })
+      }
+
+      if (!transactionHash) {
+        throw new Error('Wallet returned no transaction hash')
+      }
+
+      const receipt = await publicClient.waitForTransactionReceipt({ hash: transactionHash })
 
       if (options.persistTask) {
         storeLocalTask(address, options.persistTask.id, options.persistTask.content)
@@ -120,7 +172,9 @@ export function useBlockTodo() {
 
       setWriteState({
         pending: false,
-        statusMessage: `Confirmed: ${receipt.transactionHash.slice(0, 10)}...`,
+        statusMessage: usedFallback
+          ? `Confirmed via fallback: ${receipt.transactionHash.slice(0, 10)}...`
+          : `Confirmed via sendCalls: ${receipt.transactionHash.slice(0, 10)}...`,
       })
 
       return true
