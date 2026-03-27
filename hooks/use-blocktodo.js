@@ -3,17 +3,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAccount, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
 import { readContract } from '@wagmi/core'
-import { Attribution } from 'ox/erc8021'
 import { hashTaskContent } from '@/lib/ox'
-import { blockTodoAbi, blockTodoAddress, blockTodoAppId, blockTodoAppName } from '@/lib/blocktodo'
+import {
+  blockTodoAbi,
+  blockTodoAddress,
+  blockTodoAppId,
+  blockTodoAppName,
+  blockTodoEncodedAttribution,
+} from '@/lib/blocktodo'
 import { getLocalTasks, removeLocalTask, storeLocalTask } from '@/lib/local-tasks'
 import { wagmiConfig } from '@/lib/wagmi'
 import { trackTransaction } from '@/utils/track'
-
-function buildDataSuffix() {
-  const appCode = process.env.NEXT_PUBLIC_ERC8021_APP_CODE || 'blocktodo'
-  return Attribution.toDataSuffix({ codes: [appCode] })
-}
 
 async function fetchTasks(address, count) {
   const local = getLocalTasks(address)
@@ -97,7 +97,7 @@ export function useBlockTodo() {
     try {
       const hash = await writeContractAsync({
         ...config,
-        dataSuffix: buildDataSuffix(),
+        dataSuffix: blockTodoEncodedAttribution,
       })
 
       setWriteState({

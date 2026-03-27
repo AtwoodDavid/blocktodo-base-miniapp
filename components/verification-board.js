@@ -1,3 +1,5 @@
+import { blockTodoBuilderCode, blockTodoEncodedAttribution } from '@/lib/blocktodo'
+
 export function VerificationBoard() {
   return (
     <div className="page-stack verification-board">
@@ -19,6 +21,10 @@ export function VerificationBoard() {
             <strong>App ID</strong>
             <p className="mono">69c4fe91875674902db2b29d</p>
           </div>
+          <div className="note-box">
+            <strong>Builder Code</strong>
+            <p className="mono">{blockTodoBuilderCode}</p>
+          </div>
         </div>
       </section>
 
@@ -37,11 +43,12 @@ export function VerificationBoard() {
             <p>The provided Talent verification tag is also hardcoded globally, making this route usable as the talent URL.</p>
           </article>
           <article>
-            <h3>8021 ready</h3>
-            <p>Transactions are prepared with an ERC-8021 data suffix helper via ox. Once you send the registered builder code, we can finalize the exact attribution string.</p>
+            <h3>8021 locked</h3>
+            <p>The app now uses your exact ERC-8021 encoded attribution string on transaction writes instead of a placeholder suffix.</p>
           </article>
         </div>
         <p className="footer-note">Current app tracking id in the dashboard call is <span className="mono">app-001</span>.</p>
+        <p className="footer-note">Encoded string: <span className="mono">{blockTodoEncodedAttribution}</span></p>
       </section>
     </div>
   )
