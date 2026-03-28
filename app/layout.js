@@ -5,8 +5,8 @@ import { blockTodoAppId } from '@/lib/blocktodo'
 
 export default function RootLayout({ children }) {
   const description = 'Onchain task keeping for makers who like their tools warm, tactile, and dependable.'
-  const appUrl = 'https://blocktodo-base-miniapp.vercel.app'
-  const imageUrl = `${appUrl}/og-image.svg`
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://blocktodo-base-miniapp.vercel.app'
+  const imageUrl = `${appUrl}/og-image.png`
   const miniappEmbed = {
     version: '1',
     imageUrl,
@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
         type: 'launch_frame',
         name: 'BlockTodo',
         url: appUrl,
-        splashImageUrl: `${appUrl}/icon.svg`,
+        splashImageUrl: `${appUrl}/icon.png`,
         splashBackgroundColor: '#f2e6cf',
       },
     },
