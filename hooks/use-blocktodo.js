@@ -13,7 +13,7 @@ import {
   blockTodoAppName,
   blockTodoEncodedAttribution,
 } from '@/lib/blocktodo'
-import { getLocalTasks, removeLocalTask, storeLocalTask } from '@/lib/local-tasks'
+import { getLocalTasks, storeLocalTask } from '@/lib/local-tasks'
 import { wagmiConfig } from '@/lib/wagmi'
 import { trackTransaction } from '@/utils/track'
 
@@ -51,6 +51,48 @@ async function fetchTasks(address, count) {
   return entries.reverse()
 }
 
+async function reconcilePersistedTasks(address, startId, endIdExclusive, contents) {
+  if (!address || !contents.length) return
+
+  const normalized = contents.map((content) => ({
+    content,
+    hash: hashTaskContent(content).toLowerCase(),
+  }))
+  const hashBuckets = new Map()
+
+  normalized.forEach((entry) => {
+    const bucket = hashBuckets.get(entry.hash) || []
+    bucket.push(entry.content)
+    hashBuckets.set(entry.hash, bucket)
+  })
+
+  const rangeLength = Math.max(0, endIdExclusive - startId)
+  const ids = Array.from({ length: rangeLength }, (_, index) => startId + index)
+  const matches = await Promise.all(
+    ids.map(async (id) => {
+      const result = await readContract(wagmiConfig, {
+        address: blockTodoAddress,
+        abi: blockTodoAbi,
+        functionName: 'getTask',
+        args: [address, id],
+      })
+
+      return {
+        id,
+        contentHash: result[0].toLowerCase(),
+      }
+    }),
+  )
+
+  matches.forEach(({ id, contentHash }) => {
+    const bucket = hashBuckets.get(contentHash)
+    const nextContent = bucket?.shift()
+    if (nextContent) {
+      storeLocalTask(address, id, nextContent)
+    }
+  })
+}
+
 export function useBlockTodo() {
   const { address, isConnected } = useAccount()
   const publicClient = usePublicClient()
@@ -83,6 +125,12 @@ export function useBlockTodo() {
     const nextCount = Number(freshCount.data || 0)
     const nextItems = await fetchTasks(address, nextCount)
     setItems(nextItems)
+  }
+
+  const getFreshTaskCount = async () => {
+    if (!address || !isConnected) return 0
+    const freshCount = await refetchCount()
+    return Number(freshCount.data || 0)
   }
 
   useEffect(() => {
@@ -123,6 +171,7 @@ export function useBlockTodo() {
           capabilities: {
             dataSuffix: {
               value: blockTodoEncodedAttribution,
+              optional: true,
             },
           },
         })
@@ -159,12 +208,10 @@ export function useBlockTodo() {
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash: transactionHash })
 
-      if (options.persistTask) {
-        storeLocalTask(address, options.persistTask.id, options.persistTask.content)
-      }
-
-      if (options.removeTaskId !== undefined) {
-        removeLocalTask(address, options.removeTaskId)
+      if (options.persistContents?.length && options.expectedStartCount !== undefined) {
+        const latestCount = await getFreshTaskCount()
+        const endIdExclusive = options.exactPersistId !== undefined ? options.exactPersistId + 1 : latestCount
+        await reconcilePersistedTasks(address, options.expectedStartCount, endIdExclusive, options.persistContents)
       }
 
       trackTransaction(blockTodoAppId, blockTodoAppName, address, receipt.transactionHash)
@@ -188,7 +235,7 @@ export function useBlockTodo() {
   }
 
   const createTask = async (content) => {
-    const nextId = taskCount
+    const nextId = await getFreshTaskCount()
     return commitWrite(
       {
         address: blockTodoAddress,
@@ -197,28 +244,26 @@ export function useBlockTodo() {
         args: [content],
       },
       {
-        persistTask: { id: nextId, content },
+        expectedStartCount: nextId,
+        persistContents: [content],
       },
     )
   }
 
   const batchCreate = async (contents) => {
-    const startingId = taskCount
-    const ok = await commitWrite({
-      address: blockTodoAddress,
-      abi: blockTodoAbi,
-      functionName: 'batchCreate',
-      args: [contents],
-    })
-
-    if (ok && address) {
-      contents.forEach((content, index) => {
-        storeLocalTask(address, startingId + index, content)
-      })
-      await refresh()
-    }
-
-    return ok
+    const startingId = await getFreshTaskCount()
+    return commitWrite(
+      {
+        address: blockTodoAddress,
+        abi: blockTodoAbi,
+        functionName: 'batchCreate',
+        args: [contents],
+      },
+      {
+        expectedStartCount: startingId,
+        persistContents: contents,
+      },
+    )
   }
 
   const updateTask = async (id, content) => {
@@ -231,7 +276,9 @@ export function useBlockTodo() {
         args: [id, content],
       },
       {
-        persistTask: { id, content },
+        expectedStartCount: id,
+        exactPersistId: id,
+        persistContents: [content],
       },
     )
   }
@@ -248,17 +295,12 @@ export function useBlockTodo() {
 
   const deleteTask = async (id) => {
     if (!Number.isInteger(id) || id < 0) return false
-    return commitWrite(
-      {
-        address: blockTodoAddress,
-        abi: blockTodoAbi,
-        functionName: 'deleteTask',
-        args: [id],
-      },
-      {
-        removeTaskId: id,
-      },
-    )
+    return commitWrite({
+      address: blockTodoAddress,
+      abi: blockTodoAbi,
+      functionName: 'deleteTask',
+      args: [id],
+    })
   }
 
   return {

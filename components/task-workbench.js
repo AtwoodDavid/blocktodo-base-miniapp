@@ -24,6 +24,8 @@ export function TaskWorkbench() {
   const [updatedContent, setUpdatedContent] = useState('')
 
   const liveItems = useMemo(() => items.filter((item) => !item.deleted), [items])
+  const parsedSelectedId = selectedId.trim() === '' ? null : Number(selectedId)
+  const hasValidSelectedId = Number.isInteger(parsedSelectedId) && parsedSelectedId >= 0
 
   return (
     <div className="page-stack task-workbench">
@@ -112,7 +114,14 @@ export function TaskWorkbench() {
           </div>
           <div className="form-field">
             <label htmlFor="task-id">Task id</label>
-            <input id="task-id" value={selectedId} onChange={(event) => setSelectedId(event.target.value)} />
+            <input
+              id="task-id"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="0"
+              value={selectedId}
+              onChange={(event) => setSelectedId(event.target.value)}
+            />
           </div>
           <div className="form-field">
             <label htmlFor="updated-copy">New content</label>
@@ -125,22 +134,22 @@ export function TaskWorkbench() {
           <div className="button-row">
             <button
               className="stamp-button"
-              disabled={!isConnected || writeState.pending}
-              onClick={() => updateTask(Number(selectedId), updatedContent)}
+              disabled={!isConnected || writeState.pending || !hasValidSelectedId || !updatedContent.trim()}
+              onClick={() => updateTask(parsedSelectedId, updatedContent)}
             >
               Update Task
             </button>
             <button
               className="small-button"
-              disabled={!isConnected || writeState.pending}
-              onClick={() => toggleTask(Number(selectedId))}
+              disabled={!isConnected || writeState.pending || !hasValidSelectedId}
+              onClick={() => toggleTask(parsedSelectedId)}
             >
               Toggle Complete
             </button>
             <button
               className="ghost-button"
-              disabled={!isConnected || writeState.pending}
-              onClick={() => deleteTask(Number(selectedId))}
+              disabled={!isConnected || writeState.pending || !hasValidSelectedId}
+              onClick={() => deleteTask(parsedSelectedId)}
             >
               Soft Delete
             </button>

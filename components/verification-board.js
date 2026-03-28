@@ -1,4 +1,4 @@
-import { blockTodoBuilderCode, blockTodoEncodedAttribution } from '@/lib/blocktodo'
+import { blockTodoAppId, blockTodoBuilderCode, blockTodoEncodedAttribution } from '@/lib/blocktodo'
 
 export function VerificationBoard() {
   return (
@@ -19,7 +19,7 @@ export function VerificationBoard() {
           </div>
           <div className="note-box">
             <strong>App ID</strong>
-            <p className="mono">69c4fe91875674902db2b29d</p>
+            <p className="mono">{blockTodoAppId}</p>
           </div>
           <div className="note-box">
             <strong>Builder Code</strong>
@@ -47,7 +47,7 @@ export function VerificationBoard() {
             <p>The app now uses your exact ERC-8021 encoded attribution string and prefers the wallet_sendCalls path for Base-compatible smart wallet attribution.</p>
           </article>
         </div>
-        <p className="footer-note">Current app tracking id in the dashboard call is <span className="mono">app-001</span>.</p>
+        <p className="footer-note">Current app tracking id in the dashboard call is <span className="mono">{blockTodoAppId}</span>.</p>
         <p className="footer-note">Encoded string: <span className="mono">{blockTodoEncodedAttribution}</span></p>
       </section>
     </div>

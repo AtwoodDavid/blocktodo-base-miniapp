@@ -1,6 +1,7 @@
 import './globals.css'
 import { AppProviders } from '@/components/app-providers'
 import { AppShell } from '@/components/app-shell'
+import { blockTodoAppId } from '@/lib/blocktodo'
 
 export default function RootLayout({ children }) {
   const description = 'Onchain task keeping for makers who like their tools warm, tactile, and dependable.'
@@ -47,7 +48,7 @@ export default function RootLayout({ children }) {
         <meta name="fc:frame:button:1" content="Open BlockTodo" />
         <meta name="fc:frame:post_url" content={appUrl} />
         <meta name="fc:miniapp" content={JSON.stringify(miniappEmbed)} />
-        <meta name="base:app_id" content="69c4fe91875674902db2b29d" />
+        <meta name="base:app_id" content={blockTodoAppId} />
         <meta
           name="talentapp:project_verification"
           content="be80aa86eb705c6c3ee62c69f2ff3a08d67f40fbd11722d3dd3f51c9af0e00c5c5c24b03c69438be4440d20d445cdd0f2b2d75ebc90efba0c5c9367aac710ce8"
