@@ -46,3 +46,16 @@ Important files in this repository include:
   Lists the environment variables needed for local and production setup.
 
 ## Requirements
+
+Before running the project, make sure you have:
+
+- Node.js installed
+- npm installed
+- A production HTTPS domain for final deployment
+- The required environment variables configured
+
+## Environment Variables
+
+Create a local `.env.local` file using `.env.example` as a starting point.
+
+Example:
