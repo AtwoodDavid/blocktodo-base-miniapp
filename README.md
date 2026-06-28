@@ -131,3 +131,16 @@ curl https://blocktodo-base-miniapp.vercel.app -I
 curl https://blocktodo-base-miniapp.vercel.app/icon.png -I
 curl https://blocktodo-base-miniapp.vercel.app/og-image.png -I
 ```
+
+The homepage, manifest, icon, and Open Graph image should all be publicly reachable.
+
+## Farcaster Manifest Signing
+
+Use the Warpcast or Farcaster manifest signing flow to generate the required signed values.
+
+Recommended flow:
+
+1. Deploy the app to its final HTTPS domain.
+2. Open the Farcaster or Warpcast manifest signing tool.
+3. Enter the production app domain, for example:
+   `blocktodo-base-miniapp.vercel.app`
