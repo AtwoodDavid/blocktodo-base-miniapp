@@ -70,3 +70,15 @@ FARCASTER_SIGNATURE=REPLACE_WITH_SIGNED_SIGNATURE
 ```
 
 ## Environment Notes
+
+`NEXT_PUBLIC_APP_URL` must exactly match the deployed production domain.
+
+`BASE_BUILDER_OWNER_ADDRESS` should be the wallet address that owns the app in Base Build or Base.dev.
+
+`BASE_BUILDER_ALLOWED_ADDRESSES` is optional, but useful when more than one builder wallet should be recognized.
+
+The three `FARCASTER_*` values should be replaced after completing the Farcaster manifest signing flow.
+
+## Local Development
+
+Install dependencies:
