@@ -22,3 +22,16 @@ This makes the app usable with current Base Mini App behavior and compatible wit
 - Generated PNG Open Graph image endpoint
 - Vercel-friendly deployment setup
 - Local development and production verification steps
+
+## Project Structure
+
+Important files in this repository include:
+
+- `app/.well-known/farcaster.json/route.js`  
+  Serves the dynamic manifest endpoint.
+
+- `lib/miniapp-manifest.js`  
+  Defines the manifest shape and reads environment-based values.
+
+- `app/icon.png/route.js`  
+  Generates the PNG icon used by the manifest.
