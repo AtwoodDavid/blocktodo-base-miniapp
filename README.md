@@ -82,3 +82,17 @@ The three `FARCASTER_*` values should be replaced after completing the Farcaster
 ## Local Development
 
 Install dependencies:
+
+```bash
+npm install
+```
+
+Start the local development server:
+
+```bash
+npm run dev
+```
+
+The app should be available at:
+
+```bash
