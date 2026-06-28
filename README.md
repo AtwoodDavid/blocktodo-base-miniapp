@@ -120,3 +120,14 @@ curl http://localhost:3000/og-image.png -I
 ```
 
 Each route should return a successful response.
+
+## Production Verification
+
+After deploying, verify the production URLs:
+
+```bash
+curl https://blocktodo-base-miniapp.vercel.app/.well-known/farcaster.json
+curl https://blocktodo-base-miniapp.vercel.app -I
+curl https://blocktodo-base-miniapp.vercel.app/icon.png -I
+curl https://blocktodo-base-miniapp.vercel.app/og-image.png -I
+```
