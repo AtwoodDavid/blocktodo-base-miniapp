@@ -59,3 +59,14 @@ Before running the project, make sure you have:
 Create a local `.env.local` file using `.env.example` as a starting point.
 
 Example:
+
+```bash
+NEXT_PUBLIC_APP_URL=https://blocktodo-base-miniapp.vercel.app
+BASE_BUILDER_OWNER_ADDRESS=0xYourBaseBuildWalletAddress
+BASE_BUILDER_ALLOWED_ADDRESSES=0xYourBaseBuildWalletAddress
+FARCASTER_HEADER=REPLACE_WITH_SIGNED_HEADER
+FARCASTER_PAYLOAD=REPLACE_WITH_SIGNED_PAYLOAD
+FARCASTER_SIGNATURE=REPLACE_WITH_SIGNED_SIGNATURE
+```
+
+## Environment Notes
