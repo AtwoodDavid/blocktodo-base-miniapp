@@ -193,3 +193,14 @@ Suggested publishing flow:
 8. If verification fails, check that:
    - the signed domain matches the production domain exactly
    - the connected wallet matches the builder wallet
+   - the manifest endpoint is publicly reachable
+   - the icon and Open Graph image routes return successful responses
+
+## Static Asset Recommendations
+
+This repository currently serves manifest-friendly PNG assets through route handlers:
+
+- `https://your-domain/icon.png`
+- `https://your-domain/og-image.png`
+
+You may also replace these generated routes with static files under `public/` later.
