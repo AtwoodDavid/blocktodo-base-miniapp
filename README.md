@@ -230,3 +230,15 @@ If generated images do not load, verify the image routes directly in a browser o
 If Base.dev reports a domain mismatch, confirm that the signed domain and `NEXT_PUBLIC_APP_URL` are identical.
 
 If preview tooling cannot access the app, confirm that the production deployment is public.
+
+## Notes
+
+Keep `.env.local` out of version control.
+
+Use `.env.example` to document required configuration values.
+
+Run `npm run build` before production deployment.
+
+Verify all public URLs after each deployment.
+
+Keep the manifest endpoint available for compatibility with Base and Farcaster tooling.
