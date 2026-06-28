@@ -144,3 +144,16 @@ Recommended flow:
 2. Open the Farcaster or Warpcast manifest signing tool.
 3. Enter the production app domain, for example:
    `blocktodo-base-miniapp.vercel.app`
+4. Sign the verification request with the wallet that should own the app.
+5. Copy the generated values:
+   - `header`
+   - `payload`
+   - `signature`
+6. Add those values to `.env.local` or to the production environment.
+7. Redeploy the app.
+
+After redeploying, confirm that the live manifest includes the updated signed values:
+
+```bash
+curl https://blocktodo-base-miniapp.vercel.app/.well-known/farcaster.json
+```
