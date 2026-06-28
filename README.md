@@ -157,3 +157,15 @@ After redeploying, confirm that the live manifest includes the updated signed va
 ```bash
 curl https://blocktodo-base-miniapp.vercel.app/.well-known/farcaster.json
 ```
+
+## Deploying to Vercel
+
+This project is ready to deploy on Vercel.
+
+Typical deployment flow:
+
+1. Import the GitHub repository into Vercel.
+2. Set the environment variables from `.env.example`.
+3. Confirm that `NEXT_PUBLIC_APP_URL` matches the production URL exactly.
+4. Deploy to production.
+5. Verify the public routes after deployment.
