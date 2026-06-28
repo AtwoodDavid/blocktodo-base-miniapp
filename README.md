@@ -169,3 +169,15 @@ Typical deployment flow:
 3. Confirm that `NEXT_PUBLIC_APP_URL` matches the production URL exactly.
 4. Deploy to production.
 5. Verify the public routes after deployment.
+
+Important deployment notes:
+
+- The production domain must match `NEXT_PUBLIC_APP_URL`.
+- The public app URL must allow external tools to fetch the manifest.
+- Vercel Deployment Protection should be disabled for the public production URL if Base tooling needs access.
+
+## Base.dev Publishing
+
+Base has moved toward the Standard Web App model, while a valid `farcaster.json` manifest remains useful for compatibility and publishing flows.
+
+Suggested publishing flow:
