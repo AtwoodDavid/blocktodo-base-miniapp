@@ -218,3 +218,15 @@ Also keep image dimensions and aspect ratios compatible with the expectations of
 ## Troubleshooting
 
 If the manifest cannot be fetched, verify that the route exists at:
+
+```bash
+/.well-known/farcaster.json
+```
+
+If the production manifest returns an error, check the deployed environment variables.
+
+If generated images do not load, verify the image routes directly in a browser or with `curl -I`.
+
+If Base.dev reports a domain mismatch, confirm that the signed domain and `NEXT_PUBLIC_APP_URL` are identical.
+
+If preview tooling cannot access the app, confirm that the production deployment is public.
