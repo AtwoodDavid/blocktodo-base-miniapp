@@ -204,3 +204,17 @@ This repository currently serves manifest-friendly PNG assets through route hand
 - `https://your-domain/og-image.png`
 
 You may also replace these generated routes with static files under `public/` later.
+
+Possible static files include:
+
+- `public/icon.png`
+- `public/splash.png`
+- `public/og-image.png`
+
+If you switch to static files, keep the manifest URLs consistent.
+
+Also keep image dimensions and aspect ratios compatible with the expectations of the manifest and preview surfaces.
+
+## Troubleshooting
+
+If the manifest cannot be fetched, verify that the route exists at:
