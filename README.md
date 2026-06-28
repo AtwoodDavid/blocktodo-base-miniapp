@@ -181,3 +181,15 @@ Important deployment notes:
 Base has moved toward the Standard Web App model, while a valid `farcaster.json` manifest remains useful for compatibility and publishing flows.
 
 Suggested publishing flow:
+
+1. Deploy the final production build.
+2. Confirm that the homepage returns `200`.
+3. Confirm that the homepage includes the `base:app_id` metadata.
+4. Confirm that the manifest is live at:
+   `https://your-domain/.well-known/farcaster.json`
+5. Confirm that the manifest includes the expected Base and Mini App fields.
+6. Open Base.dev.
+7. Use the production app domain in the publish or verify flow.
+8. If verification fails, check that:
+   - the signed domain matches the production domain exactly
+   - the connected wallet matches the builder wallet
