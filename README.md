@@ -108,3 +108,15 @@ npm run build
 ```
 
 This helps confirm that the app compiles successfully before it is published.
+
+## Local Verification
+
+After starting the local development server, verify the manifest and generated image routes:
+
+```bash
+curl http://localhost:3000/.well-known/farcaster.json
+curl http://localhost:3000/icon.png -I
+curl http://localhost:3000/og-image.png -I
+```
+
+Each route should return a successful response.
