@@ -35,3 +35,14 @@ Important files in this repository include:
 
 - `app/icon.png/route.js`  
   Generates the PNG icon used by the manifest.
+
+- `app/og-image.png/route.js`  
+  Generates the hero and Open Graph PNG image.
+
+- `app/layout.js`  
+  Defines Base embed metadata, including `base:app_id`.
+
+- `.env.example`  
+  Lists the environment variables needed for local and production setup.
+
+## Requirements
