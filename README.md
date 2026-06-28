@@ -96,3 +96,15 @@ npm run dev
 The app should be available at:
 
 ```bash
+http://localhost:3000
+```
+
+## Build
+
+Run a local production build before deploying:
+
+```bash
+npm run build
+```
+
+This helps confirm that the app compiles successfully before it is published.
